@@ -1,72 +1,29 @@
 package com.denizenscript.depenizen.bukkit.properties.essentials;
 
-import com.denizenscript.denizencore.objects.*;
+import com.denizenscript.denizen.objects.LocationTag;
+import com.denizenscript.denizen.objects.PlayerTag;
 import com.denizenscript.denizencore.objects.core.DurationTag;
 import com.denizenscript.denizencore.objects.core.ElementTag;
 import com.denizenscript.denizencore.objects.core.ListTag;
 import com.denizenscript.denizencore.objects.core.MapTag;
-import com.denizenscript.denizencore.utilities.debugging.SlowWarning;
-import com.earth2me.essentials.Essentials;
-import com.earth2me.essentials.User;
-import com.denizenscript.denizen.objects.LocationTag;
-import com.denizenscript.denizen.objects.PlayerTag;
 import com.denizenscript.denizencore.utilities.debugging.Debug;
-import com.denizenscript.denizencore.tags.Attribute;
-import com.denizenscript.denizencore.objects.properties.Property;
+import com.denizenscript.denizencore.utilities.debugging.SlowWarning;
 import com.denizenscript.depenizen.bukkit.bridges.EssentialsBridge;
+import com.earth2me.essentials.User;
+import net.essentialsx.api.v2.services.mail.MailMessage;
 import org.bukkit.Location;
 
 import java.util.UUID;
 
-public class EssentialsPlayerProperties implements Property {
+public class EssentialsPlayerExtensions {
 
-    @Override
-    public String getPropertyString() {
-        return null;
-    }
-
-    @Override
-    public String getPropertyId() {
-        return "EssentialsPlayer";
-    }
-
-    public static boolean describes(ObjectTag object) {
-        return object instanceof PlayerTag;
-    }
-
-    public static EssentialsPlayerProperties getFrom(ObjectTag object) {
-        if (!describes(object)) {
-            return null;
-        }
-        else {
-            return new EssentialsPlayerProperties((PlayerTag) object);
-        }
-    }
-
-    public static final String[] handledTags = new String[] {
-            "god_mode", "has_home", "is_afk", "is_muted", "is_vanished", "home_list", "home_location_list",
-            "ignored_players", "home_name_list", "mail_list", "mute_timout", "socialspy",
-            "list_home_locations", "list_home_names", "list_homes", "list_mails", "essentials_homes"
-    };
-
-    public static final String[] handledMechs = new String[] {
-            "is_afk", "god_mode", "is_muted", "socialspy", "vanish", "essentials_ignore", "remove_essentials_home"
-    };
-
-    public EssentialsPlayerProperties(PlayerTag player) {
-        this.player = player;
-    }
-
-    public User getUser() {
-        return ((Essentials) EssentialsBridge.instance.plugin).getUser(player.getUUID());
+    public static User getUser(PlayerTag player) {
+        return EssentialsBridge.essentialsInstance.getUser(player.getUUID());
     }
 
     public static SlowWarning oldHomesTag = new SlowWarning("essentialsListHomes", "The tag 'list_homes' from Depenizen/Essentials is deprecated: use 'essentials_homes' (now a MapTag).");
 
-    PlayerTag player;
-
-    @Override
-    public ObjectTag getObjectAttribute(Attribute attribute) {
+    public static void register() {
 
         // <--[tag]
         // @attribute <PlayerTag.god_mode>
@@ -76,9 +33,9 @@ public class EssentialsPlayerProperties implements Property {
         // @description
         // Returns whether the player is currently in god mode.
         // -->
-        if (attribute.startsWith("god_mode")) {
-            return new ElementTag(getUser().isGodModeEnabled()).getObjectAttribute(attribute.fulfill(1));
-        }
+        PlayerTag.tagProcessor.registerTag(ElementTag.class, "god_mode", (attribute, player) -> {
+            return new ElementTag(getUser(player).isGodModeEnabled());
+        });
 
         // <--[tag]
         // @attribute <PlayerTag.has_home>
@@ -87,9 +44,10 @@ public class EssentialsPlayerProperties implements Property {
         // @description
         // Returns whether the player has set at least one home.
         // -->
-        if (attribute.startsWith("has_home")) {
-            return new ElementTag(getUser().hasHome()).getObjectAttribute(attribute.fulfill(1));
-        }
+        PlayerTag.tagProcessor.registerTag(ElementTag.class, "has_home", (attribute, player) -> {
+            return new ElementTag(getUser(player).hasHome());
+        });
+
 
         // <--[tag]
         // @attribute <PlayerTag.is_afk>
@@ -99,9 +57,9 @@ public class EssentialsPlayerProperties implements Property {
         // @description
         // Returns whether the player is AFK.
         // -->
-        if (attribute.startsWith("is_afk")) {
-            return new ElementTag(getUser().isAfk()).getObjectAttribute(attribute.fulfill(1));
-        }
+        PlayerTag.tagProcessor.registerTag(ElementTag.class, "is_afk", (attribute, player) -> {
+            return new ElementTag(getUser(player).isAfk());
+        });
 
         // <--[tag]
         // @attribute <PlayerTag.is_muted>
@@ -111,9 +69,9 @@ public class EssentialsPlayerProperties implements Property {
         // @description
         // Returns whether the player is muted.
         // -->
-        if (attribute.startsWith("is_muted")) {
-            return new ElementTag(getUser().isMuted()).getObjectAttribute(attribute.fulfill(1));
-        }
+        PlayerTag.tagProcessor.registerTag(ElementTag.class, "is_muted", (attribute, player) -> {
+            return new ElementTag(getUser(player).isMuted());
+        });
 
         // <--[tag]
         // @attribute <PlayerTag.is_vanished>
@@ -123,9 +81,9 @@ public class EssentialsPlayerProperties implements Property {
         // @description
         // Returns whether the player is vanished.
         // -->
-        if (attribute.startsWith("is_vanished")) {
-            return new ElementTag(getUser().isVanished()).getObjectAttribute(attribute.fulfill(1));
-        }
+        PlayerTag.tagProcessor.registerTag(ElementTag.class, "is_vanished", (attribute, player) -> {
+            return new ElementTag(getUser(player).isVanished());
+        });
 
         // <--[tag]
         // @attribute <PlayerTag.essentials_homes>
@@ -134,13 +92,13 @@ public class EssentialsPlayerProperties implements Property {
         // @description
         // Returns a map of the homes of the player, with keys as the home name and values as the home location.
         // -->
-        if (attribute.startsWith("essentials_homes")) {
+        PlayerTag.tagProcessor.registerTag(MapTag.class, "essentials_homes", (attribute, player) -> {
             MapTag homes = new MapTag();
-            for (String home : getUser().getHomes()) {
+            for (String homeName : getUser(player).getHomes()) {
                 try {
-                    Location homeLoc = getUser().getHome(home);
+                    Location homeLoc = getUser(player).getHome(homeName);
                     if (homeLoc != null) { // home location can be null if the world isn't loaded
-                        homes.putObject(home, new LocationTag(homeLoc));
+                        homes.putObject(homeName, new LocationTag(homeLoc));
                     }
                 }
                 catch (Exception e) {
@@ -149,15 +107,16 @@ public class EssentialsPlayerProperties implements Property {
                     }
                 }
             }
-            return homes.getObjectAttribute(attribute.fulfill(1));
-        }
+            return homes;
+        });
 
-        if (attribute.startsWith("list_homes") || attribute.startsWith("home_list")) {
+        PlayerTag.tagProcessor.registerTag(ListTag.class, "list_homes", (attribute, player) -> {
             oldHomesTag.warn(attribute.context);
             ListTag homes = new ListTag();
-            for (String home : getUser().getHomes()) {
+            User user = getUser(player);
+            for (String homeName : user.getHomes()) {
                 try {
-                    homes.add(home + "/" + new LocationTag(getUser().getHome(home)).identifySimple());
+                    homes.add(homeName + "/" + new LocationTag(user.getHome(homeName)).identifySimple());
                 }
                 catch (Exception e) {
                     if (!attribute.hasAlternative()) {
@@ -165,15 +124,16 @@ public class EssentialsPlayerProperties implements Property {
                     }
                 }
             }
-            return homes.getObjectAttribute(attribute.fulfill(1));
-        }
+            return homes;
+        }, "homes_list");
 
-        if (attribute.startsWith("list_home_locations") || attribute.startsWith("home_location_list")) {
+        PlayerTag.tagProcessor.registerTag(ListTag.class, "list_home_locations", (attribute, player) -> {
             oldHomesTag.warn(attribute.context);
             ListTag homes = new ListTag();
-            for (String home : getUser().getHomes()) {
+            User user = getUser(player);
+            for (String homeName : user.getHomes()) {
                 try {
-                    homes.addObject(new LocationTag(getUser().getHome(home)));
+                    homes.addObject(new LocationTag(user.getHome(homeName)));
                 }
                 catch (Exception e) {
                     if (!attribute.hasAlternative()) {
@@ -181,13 +141,13 @@ public class EssentialsPlayerProperties implements Property {
                     }
                 }
             }
-            return homes.getObjectAttribute(attribute.fulfill(1));
-        }
+            return homes;
+        }, "home_location_list");
 
-        if (attribute.startsWith("list_home_names") || attribute.startsWith("home_name_list")) {
+        PlayerTag.tagProcessor.registerTag(ListTag.class, "list_home_names", (attribute, player) -> {
             oldHomesTag.warn(attribute.context);
-            return new ListTag(getUser().getHomes()).getObjectAttribute(attribute.fulfill(1));
-        }
+            return new ListTag(getUser(player).getHomes());
+        });
 
         // <--[tag]
         // @attribute <PlayerTag.ignored_players>
@@ -196,12 +156,11 @@ public class EssentialsPlayerProperties implements Property {
         // @description
         // Returns a list of the ignored players of the player.
         // -->
-        if (attribute.startsWith("ignored_players")) {
+        PlayerTag.tagProcessor.registerTag(ListTag.class, "ignored_players", (attribute, player) -> {
             ListTag players = new ListTag();
-            Essentials ess = (Essentials) EssentialsBridge.instance.plugin;
-            for (UUID player : getUser()._getIgnoredPlayers()) {
+            for (UUID uuid : getUser(player)._getIgnoredPlayers()) {
                 try {
-                    players.addObject(new PlayerTag(player));
+                    players.addObject(new PlayerTag(uuid));
                 }
                 catch (Exception e) {
                     if (!attribute.hasAlternative()) {
@@ -209,8 +168,9 @@ public class EssentialsPlayerProperties implements Property {
                     }
                 }
             }
-            return players.getObjectAttribute(attribute.fulfill(1));
-        }
+            return players;
+        });
+
 
         // <--[tag]
         // @attribute <PlayerTag.list_mails>
@@ -219,9 +179,9 @@ public class EssentialsPlayerProperties implements Property {
         // @description
         // Returns a list of mail the player currently has.
         // -->
-        if (attribute.startsWith("list_mails") || attribute.startsWith("mail_list")) {
-            return new ListTag(getUser().getMails()).getObjectAttribute(attribute.fulfill(1));
-        }
+        PlayerTag.tagProcessor.registerTag(ListTag.class, "list_mails", (attribute, player) -> {
+            return new ListTag(getUser(player).getMailMessages().stream().map(MailMessage::getMessage).toList());
+        }, "mail_list");
 
         // <--[tag]
         // @attribute <PlayerTag.mute_timeout>
@@ -230,10 +190,9 @@ public class EssentialsPlayerProperties implements Property {
         // @description
         // Returns how much time is left until the player is unmuted.
         // -->
-        if (attribute.startsWith("mute_timeout")) {
-            return new DurationTag((getUser().getMuteTimeout() - System.currentTimeMillis()))
-                    .getObjectAttribute(attribute.fulfill(1));
-        }
+        PlayerTag.tagProcessor.registerTag(DurationTag.class, "mute_timeout", (attribute, player) -> {
+            return new DurationTag(getUser(player).getMuteTimeout() - System.currentTimeMillis());
+        });
 
         // <--[tag]
         // @attribute <PlayerTag.socialspy>
@@ -243,15 +202,9 @@ public class EssentialsPlayerProperties implements Property {
         // @description
         // Returns whether the player has SocialSpy enabled.
         // -->
-        if (attribute.startsWith("socialspy")) {
-            return new ElementTag(getUser().isSocialSpyEnabled()).getObjectAttribute(attribute.fulfill(1));
-        }
-
-        return null;
-    }
-
-    @Override
-    public void adjust(Mechanism mechanism) {
+        PlayerTag.tagProcessor.registerTag(ElementTag.class, "social_spy", (attribute, player) -> {
+            return new ElementTag(getUser(player).isSocialSpyEnabled());
+        });
 
         // <--[mechanism]
         // @object PlayerTag
@@ -263,9 +216,11 @@ public class EssentialsPlayerProperties implements Property {
         // @tags
         // <PlayerTag.is_afk>
         // -->
-        if ((mechanism.matches("is_afk") || mechanism.matches("afk")) && mechanism.requireBoolean()) {
-            getUser().setAfk(mechanism.getValue().asBoolean());
-        }
+        PlayerTag.tagProcessor.registerMechanism("is_afk", false, ElementTag.class, (player, mechanism, input) -> {
+            if (mechanism.requireDouble()) {
+                getUser(player).setAfk(input.asBoolean());
+            }
+        }, "afk");
 
         // <--[mechanism]
         // @object PlayerTag
@@ -277,9 +232,11 @@ public class EssentialsPlayerProperties implements Property {
         // @tags
         // <PlayerTag.god_mode>
         // -->
-        if (mechanism.matches("god_mode") && mechanism.requireBoolean()) {
-            getUser().setGodModeEnabled(mechanism.getValue().asBoolean());
-        }
+        PlayerTag.tagProcessor.registerMechanism("god_mode", false, ElementTag.class, (player, mechanism, input) -> {
+            if (mechanism.requireDouble()) {
+                getUser(player).setGodModeEnabled(input.asBoolean());
+            }
+        });
 
         // <--[mechanism]
         // @object PlayerTag
@@ -293,13 +250,15 @@ public class EssentialsPlayerProperties implements Property {
         // <PlayerTag.is_muted>
         // <PlayerTag.mute_timeout>
         // -->
-        if ((mechanism.matches("is_muted") || mechanism.matches("muted")) && mechanism.requireBoolean()) {
-            ListTag split = mechanism.valueAsType(ListTag.class);
-            getUser().setMuted(new ElementTag(split.get(0)).asBoolean());
-            if (split.size() > 1) {
-                getUser().setMuteTimeout(System.currentTimeMillis() + DurationTag.valueOf(split.get(1), mechanism.context).getMillis());
+        PlayerTag.tagProcessor.registerMechanism("is_muted", false, ElementTag.class, (player, mechanism, input) -> {
+            if (mechanism.requireBoolean()) {
+                ListTag split = mechanism.valueAsType(ListTag.class);
+                getUser(player).setMuted(new ElementTag(split.get(0)).asBoolean());
+                if (split.size() > 1) {
+                    getUser(player).setMuteTimeout(System.currentTimeMillis() + DurationTag.valueOf(split.get(1), mechanism.context).getMillis());
+                }
             }
-        }
+        }, "muted");
 
         // <--[mechanism]
         // @object PlayerTag
@@ -309,10 +268,10 @@ public class EssentialsPlayerProperties implements Property {
         // @description
         // Removes the player's Essentials home that matches the specified name.
         // -->
-        if (mechanism.matches("remove_essentials_home")) {
+        PlayerTag.tagProcessor.registerMechanism("remove_essentials_home", false, ElementTag.class, (player, mechanism, input) -> {
             try {
-                if (getUser().hasHome(mechanism.getValue().toString())) {
-                    getUser().delHome(mechanism.getValue().toString());
+                if (getUser(player).hasHome(input.toString())) {
+                    getUser(player).delHome(input.toString());
                 }
                 else {
                     mechanism.echoError("Invalid home name specified!");
@@ -321,7 +280,7 @@ public class EssentialsPlayerProperties implements Property {
             catch (Exception e) {
                 Debug.echoError(e);
             }
-        }
+        });
 
         // <--[mechanism]
         // @object PlayerTag
@@ -333,13 +292,25 @@ public class EssentialsPlayerProperties implements Property {
         // @tags
         // <PlayerTag.socialspy>
         // -->
-        if (mechanism.matches("socialspy") && mechanism.requireBoolean()) {
-            getUser().setSocialSpyEnabled(mechanism.getValue().asBoolean());
-        }
+        PlayerTag.tagProcessor.registerMechanism("socialspy", false, ElementTag.class, (player, mechanism, input) -> {
+            if (mechanism.requireBoolean()) {
+                getUser(player).setSocialSpyEnabled(input.asBoolean());
+            }
+        });
 
         // <--[mechanism]
         // @object PlayerTag
         // @name vanish
+        // @input ElementTag(Boolean)
+        // @plugin Depenizen, Essentials
+        // @deprecated Use 'PlayerTag.is_vanished'
+        // @description
+        // Deprecated in favor of <@link mechanism PlayerTag.is_vanished>.
+        // -->
+
+        // <--[mechanism]
+        // @object PlayerTag
+        // @name is_vanished
         // @input ElementTag(Boolean)
         // @plugin Depenizen, Essentials
         // @description
@@ -347,9 +318,11 @@ public class EssentialsPlayerProperties implements Property {
         // @tags
         // <PlayerTag.is_vanished>
         // -->
-        if (mechanism.matches("vanish") && mechanism.requireBoolean()) {
-            getUser().setVanished(mechanism.getValue().asBoolean());
-        }
+        PlayerTag.tagProcessor.registerMechanism("is_vanished", false, ElementTag.class, (player, mechanism, input) -> {
+            if (mechanism.requireBoolean()) {
+                getUser(player).setVanished(input.asBoolean());
+            }
+        }, "vanish");
 
         // <--[mechanism]
         // @object PlayerTag
@@ -362,13 +335,13 @@ public class EssentialsPlayerProperties implements Property {
         // @tags
         // <PlayerTag.ignored_players>
         // -->
-        if (mechanism.matches("essentials_ignore")) {
-            Essentials ess = (Essentials) EssentialsBridge.instance.plugin;
+        PlayerTag.tagProcessor.registerMechanism("essentials_ignore", false, ElementTag.class, (player, mechanism, input) -> {
             ListTag split = mechanism.valueAsType(ListTag.class);
             PlayerTag otherPlayer = PlayerTag.valueOf(split.get(0), mechanism.context);
             boolean shouldIgnore = split.size() < 2 || new ElementTag(split.get(1)).asBoolean();
-            getUser().setIgnoredPlayer(ess.getUser(otherPlayer.getUUID()), shouldIgnore);
-        }
+            getUser(player).setIgnoredPlayer(getUser(otherPlayer), shouldIgnore);
+        });
 
     }
+
 }
