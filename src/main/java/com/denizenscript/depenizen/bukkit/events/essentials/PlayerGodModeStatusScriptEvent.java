@@ -38,11 +38,7 @@ public class PlayerGodModeStatusScriptEvent extends BukkitScriptEvent implements
     public GodStatusChangeEvent event;
 
     public PlayerGodModeStatusScriptEvent() {
-    }
-
-    @Override
-    public boolean couldMatch(ScriptPath path) {
-        return path.eventLower.startsWith("player god mode");
+        registerCouldMatcher("player god mode");
     }
 
     @Override
@@ -71,10 +67,10 @@ public class PlayerGodModeStatusScriptEvent extends BukkitScriptEvent implements
 
     @Override
     public ObjectTag getContext(String name) {
-        if (name.equals("status")) {
-            return new ElementTag(event.getValue());
-        }
-        return super.getContext(name);
+        return switch(name) {
+            case "status" -> new ElementTag(event.getValue());
+            default -> super.getContext(name);
+        };
     }
 
     @EventHandler

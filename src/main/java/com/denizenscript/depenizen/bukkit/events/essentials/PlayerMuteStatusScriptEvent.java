@@ -39,33 +39,26 @@ public class PlayerMuteStatusScriptEvent extends BukkitScriptEvent implements Li
     public MuteStatusChangeEvent event;
 
     public PlayerMuteStatusScriptEvent() {
-    }
-
-    @Override
-    public boolean couldMatch(ScriptPath path) {
-        return path.eventLower.startsWith("player mute")
-                || path.eventLower.startsWith("player unmuted")
-                || path.eventLower.startsWith("player un-muted");
+        registerCouldMatcher("player mute");
+        registerCouldMatcher("player unmuted");
+        registerCouldMatcher("player un-muted");
     }
 
     @Override
     public boolean matches(ScriptPath path) {
         String status = path.eventArgLowerAt(1);
         if (status.equals("muted") && !event.getValue()) {
-            if (!event.getValue()) {
-                return false;
-            }
+            return false;
         }
-        else if (status.equals("unmuted") || status.equals("un-muted")) {
-            if (event.getValue()) {
-                return false;
-            }
+        else if ((status.equals("unmuted") || status.equals("un-muted")) && event.getValue()) {
+            return false;
         }
         else if (!status.equals("status")) {
             return false;
         }
         return super.matches(path);
     }
+
 
     @Override
     public ScriptEntryData getScriptEntryData() {
@@ -74,10 +67,10 @@ public class PlayerMuteStatusScriptEvent extends BukkitScriptEvent implements Li
 
     @Override
     public ObjectTag getContext(String name) {
-        if (name.equals("status")) {
-            return new ElementTag(event.getValue());
-        }
-        return super.getContext(name);
+        return switch(name){
+            case "status" -> new ElementTag(event.getValue());
+            default -> super.getContext(name);
+        };
     }
 
     @EventHandler

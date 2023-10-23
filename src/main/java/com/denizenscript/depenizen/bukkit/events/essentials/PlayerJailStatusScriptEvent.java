@@ -39,13 +39,9 @@ public class PlayerJailStatusScriptEvent extends BukkitScriptEvent implements Li
     public JailStatusChangeEvent event;
 
     public PlayerJailStatusScriptEvent() {
-    }
-
-    @Override
-    public boolean couldMatch(ScriptPath path) {
-        return path.eventLower.startsWith("player jail")
-                || path.eventLower.startsWith("player unjailed")
-                || path.eventLower.startsWith("player un-jailed");
+        registerCouldMatcher("player jail");
+        registerCouldMatcher("player unjailed");
+        registerCouldMatcher("player un-jailed");
     }
 
     @Override
@@ -74,10 +70,10 @@ public class PlayerJailStatusScriptEvent extends BukkitScriptEvent implements Li
 
     @Override
     public ObjectTag getContext(String name) {
-        if (name.equals("status")) {
-            return new ElementTag(event.getValue());
-        }
-        return super.getContext(name);
+        return switch(name) {
+            case "status" -> new ElementTag(event.getValue());
+            default -> super.getContext(name);
+        };
     }
 
     @EventHandler

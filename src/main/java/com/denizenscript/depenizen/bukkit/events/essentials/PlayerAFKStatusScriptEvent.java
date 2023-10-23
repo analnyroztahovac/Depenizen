@@ -38,28 +38,25 @@ public class PlayerAFKStatusScriptEvent extends BukkitScriptEvent implements Lis
     public AfkStatusChangeEvent event;
 
     public PlayerAFKStatusScriptEvent() {
-    }
-
-    @Override
-    public boolean couldMatch(ScriptPath path) {
-        return path.eventLower.startsWith("player goes afk")
-                || path.eventLower.startsWith("player returns from afk")
-                || path.eventLower.startsWith("player afk status changes");
+        registerCouldMatcher("player goes afk");
+        registerCouldMatcher("player returns from afk");
+        registerCouldMatcher("player afk status changes");
     }
 
     @Override
     public boolean matches(ScriptPath path) {
-        if (path.eventArgLowerAt(1).equals("goes")) {
+        String status = path.eventArgLowerAt(1);
+        if (status.equals("goes")) {
             if (!event.getValue()) {
                 return false;
             }
         }
-        else if (path.eventArgLowerAt(1).equals("returns")) {
+        else if (status.equals("returns")) {
             if (event.getValue()) {
                 return false;
             }
         }
-        else if (!path.eventArgLowerAt(1).equals("afk")) {
+        else if (!status.equals("afk")) {
             return false;
         }
         return super.matches(path);
@@ -72,10 +69,10 @@ public class PlayerAFKStatusScriptEvent extends BukkitScriptEvent implements Lis
 
     @Override
     public ObjectTag getContext(String name) {
-        if (name.equals("status")) {
-            return new ElementTag(event.getValue());
-        }
-        return super.getContext(name);
+        return switch (name) {
+            case "status" -> new ElementTag(event.getValue());
+            default -> super.getContext(name);
+        };
     }
 
     @EventHandler

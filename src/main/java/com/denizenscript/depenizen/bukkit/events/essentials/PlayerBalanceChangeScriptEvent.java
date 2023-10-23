@@ -37,11 +37,7 @@ public class PlayerBalanceChangeScriptEvent extends BukkitScriptEvent implements
     public UserBalanceUpdateEvent event;
 
     public PlayerBalanceChangeScriptEvent() {
-    }
-
-    @Override
-    public boolean couldMatch(ScriptPath path) {
-        return path.eventLower.startsWith("essentials player balance changes");
+        registerCouldMatcher("essentials player balance changes");
     }
 
     @Override
@@ -59,16 +55,12 @@ public class PlayerBalanceChangeScriptEvent extends BukkitScriptEvent implements
 
     @Override
     public ObjectTag getContext(String name) {
-        if (name.equals("new_balance")) {
-            return new ElementTag(event.getNewBalance());
-        }
-        if (name.equals("old_balance")) {
-            return new ElementTag(event.getOldBalance());
-        }
-        if (name.equals("cause")) {
-            return new ElementTag(event.getCause());
-        }
-        return super.getContext(name);
+        return switch(name) {
+            case "new_balance" -> new ElementTag(event.getNewBalance());
+            case "old_balance" -> new ElementTag(event.getOldBalance());
+            case "cause" -> new ElementTag(event.getCause());
+            default -> super.getContext(name);
+        };
     }
 
     @EventHandler
