@@ -48,7 +48,6 @@ public class EssentialsPlayerExtensions {
             return new ElementTag(getUser(player).hasHome());
         });
 
-
         // <--[tag]
         // @attribute <PlayerTag.is_afk>
         // @returns ElementTag(Boolean)
@@ -171,7 +170,6 @@ public class EssentialsPlayerExtensions {
             return players;
         });
 
-
         // <--[tag]
         // @attribute <PlayerTag.list_mails>
         // @returns ListTag
@@ -217,7 +215,7 @@ public class EssentialsPlayerExtensions {
         // <PlayerTag.is_afk>
         // -->
         PlayerTag.tagProcessor.registerMechanism("is_afk", false, ElementTag.class, (player, mechanism, input) -> {
-            if (mechanism.requireDouble()) {
+            if (mechanism.requireBoolean()) {
                 getUser(player).setAfk(input.asBoolean());
             }
         }, "afk");
@@ -233,7 +231,7 @@ public class EssentialsPlayerExtensions {
         // <PlayerTag.god_mode>
         // -->
         PlayerTag.tagProcessor.registerMechanism("god_mode", false, ElementTag.class, (player, mechanism, input) -> {
-            if (mechanism.requireDouble()) {
+            if (mechanism.requireBoolean()) {
                 getUser(player).setGodModeEnabled(input.asBoolean());
             }
         });
