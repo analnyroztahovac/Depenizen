@@ -46,15 +46,11 @@ public class PlayerAFKStatusScriptEvent extends BukkitScriptEvent implements Lis
     @Override
     public boolean matches(ScriptPath path) {
         String status = path.eventArgLowerAt(1);
-        if (status.equals("goes")) {
-            if (!event.getValue()) {
-                return false;
-            }
+        if (status.equals("goes") && !event.getValue()) {
+            return false;
         }
-        else if (status.equals("returns")) {
-            if (event.getValue()) {
-                return false;
-            }
+        else if (status.equals("returns") && event.getValue()) {
+            return false;
         }
         else if (!status.equals("afk")) {
             return false;
