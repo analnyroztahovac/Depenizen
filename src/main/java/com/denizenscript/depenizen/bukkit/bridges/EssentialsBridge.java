@@ -58,9 +58,7 @@ public class EssentialsBridge extends Bridge {
                 list.addAll(essentialsInstance.getWarps().getList());
                 return list;
             });
-
         }
-
     }
 
     public static Essentials essentialsInstance;
@@ -77,5 +75,4 @@ public class EssentialsBridge extends Bridge {
         EssentialsPlayerExtensions.register();
         new EssentialsTagBase();
     }
-
 }
