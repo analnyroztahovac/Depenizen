@@ -12,9 +12,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <craftbukkit.version>1.20.1-R0.1-SNAPSHOT</craftbukkit.version>
-        <citizens.version>2.0.32-SNAPSHOT</citizens.version>
-        <denizen.version>1.2.8-SNAPSHOT</denizen.version>
+        <craftbukkit.version>1.20.2-R0.1-SNAPSHOT</craftbukkit.version>
+        <citizens.version>2.0.33-SNAPSHOT</citizens.version>
+        <denizen.version>1.2.9-SNAPSHOT</denizen.version>
         <BUILD_NUMBER>Unknown</BUILD_NUMBER>
     </properties>
 
@@ -269,9 +269,9 @@
             <systemPath>${basedir}/lib/pvpstats.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>me.blackvein</groupId>
-            <artifactId>quests</artifactId>
-            <version>4.5.3</version>
+            <groupId>me.pikamug.quests</groupId>
+            <artifactId>quests-core</artifactId>
+            <version>5.0.0-rc.1</version>
             <scope>system</scope>
             <systemPath>${basedir}/lib/Quests.jar</systemPath>
         </dependency>
