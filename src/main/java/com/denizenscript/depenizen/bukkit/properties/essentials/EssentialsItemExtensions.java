@@ -31,13 +31,14 @@ public class EssentialsItemExtensions {
                 return null;
             }
             int mul = 1;
-            if (attribute.startsWith("quantity")) {
+            if (attribute.startsWith("quantity", 2)) {
+                attribute.fulfill(1);
                 oldWorthQuantityTag.warn();
                 // <--[tag]
                 // @attribute <ItemTag.worth.quantity[<#>]>
                 // @returns ElementTag(Decimal)
                 // @plugin Depenizen, Essentials
-                // @deprecated Use 'elementtag.mul[quantity]'
+                // @deprecated Use 'ElementTag.mul[<#>]'
                 // @description
                 // Returns the amount of money the quantity specified of this item is worth in Essentials.
                 // -->
